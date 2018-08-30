@@ -10,7 +10,7 @@ from emlx.progress import Progress
 
 
 def find_mailboxes(path):
-    if os.path.isdir(path) is False:
+    if not os.path.isdir(path):
         return []
 
     paths = []
