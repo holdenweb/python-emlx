@@ -13,29 +13,24 @@ class EmlxMessage(object):
     def __init__(self, message=None):
         if isinstance(message, bytes):
             # The size of the message is the first line of the file.
-            first_line = message.split(b"\n")[0]
-            self.content_size = int(first_line)
-            if self.content_size is 0:
+            first_line, rest = message.split(b"\n", 1)[0]
+            end = self.content_size = int(first_line)
+            if not end:
                 return
             
             # Read in the message portion.
-            start = len(first_line) + 1
-            end = start + self.content_size
-            if start > 0 and end > 0:
-                self.content = message[start:end]
+            self.content = rest[:end]
             
             # Read in the plist metadata at the end.
-            if start > 0 and end > 0:
-                meta = message[end:]
+            meta = rest[end:]
+            if meta:
                 try:
                     self.plist = plistlib.loads(meta)
                 except:
                     logging.error("failed to parse message metadata plist")
     
     def __str__(self):
-        if not self.content:
-            return ""
-        return str(self.content)
+        return str(self.content) if self.content else ""
     
     def __bytes__(self):
         content_size = str(len(self.content)).encode("utf8")
